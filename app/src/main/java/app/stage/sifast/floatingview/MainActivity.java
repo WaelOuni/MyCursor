@@ -11,6 +11,7 @@ import android.view.ViewManager;
 import android.widget.Button;
 
 import app.stage.sifast.floatingview.Service.ServiceFloating;
+import eu.chainfire.libsuperuser.Shell;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
+                Shell.SU.available();
                 startService(new Intent(MainActivity.this, ServiceFloating.class));
             }
         });

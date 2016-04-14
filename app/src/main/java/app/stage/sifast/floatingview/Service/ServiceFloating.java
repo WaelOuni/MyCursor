@@ -1,56 +1,37 @@
 package app.stage.sifast.floatingview.Service;
 
-import android.app.Instrumentation;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.IBinder;
-import android.os.SystemClock;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewManager;
-import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
-import android.widget.Toast;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import app.stage.sifast.floatingview.R;
+import eu.chainfire.libsuperuser.Shell;
 
 public class ServiceFloating extends Service {
 
-    public static int ID_NOTIFICATION = 2018;
-
     private WindowManager windowManager;
     private ImageView chatHead;
-    private PopupWindow pwindo;
-
+/*    private PopupWindow pwindo;
+    private Boolean _enable = true;
+    ArrayList<String> myArray;
+    List listCity;*/
     boolean mHasDoubleClicked = false;
     long lastPressTime;
     long lastReleaseTime;
     long pressTime;
-    private Boolean _enable = true;
-    ArrayList<String> myArray;
-    List listCity;
     WindowManager.LayoutParams params;
 
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -73,6 +54,7 @@ public class ServiceFloating extends Service {
         params.x = 0;
         params.y = 100;
         windowManager.addView(chatHead, params);
+
         try {
 
             chatHead.setOnTouchListener(new View.OnTouchListener() {
@@ -84,11 +66,9 @@ public class ServiceFloating extends Service {
 
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    int clics;
                     int x;
                     int y;
                     switch (event.getAction()) {
-
                         case MotionEvent.ACTION_DOWN:
                             // Get current time in nano seconds.
                             pressTime = System.currentTimeMillis();
@@ -99,28 +79,19 @@ public class ServiceFloating extends Service {
                             } else {     // If not double click....
                                 mHasDoubleClicked = false;
                             }
-
                             lastPressTime = pressTime;
                             initialX = paramsF.x;
                             initialY = paramsF.y;
                             initialTouchX = event.getRawX();
                             initialTouchY = event.getRawY();
-                            Log.i("{x,y}=", event.getX() + " " + event.getY());
-                            //	Toast.makeText(getApplicationContext(), "hiiii", Toast.LENGTH_LONG).show();
-                            clics = 1;
                             break;
 
                         case MotionEvent.ACTION_UP:
-
-                            clics = 0;
-                            x = params.x;
-                            y = params.y;
+                            x = paramsF.x + v.getWidth()/2;
+                            y = paramsF.y + v.getHeight()/2;
                             lastReleaseTime = System.currentTimeMillis();
                             if (lastReleaseTime - pressTime <= 300) {
-
-
-                                //	Toast.makeText(getApplicationContext(), "Clicked", Toast.LENGTH_LONG).show();
-                                windowManager.removeViewImmediate(chatHead);
+                    /*           windowManager.removeViewImmediate(chatHead);
                                 windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
                                 params = new WindowManager.LayoutParams(
                                         WindowManager.LayoutParams.WRAP_CONTENT,
@@ -129,19 +100,17 @@ public class ServiceFloating extends Service {
                                         WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW,
                                         PixelFormat.TRANSLUCENT);
                                 params.gravity = Gravity.TOP | Gravity.LEFT;
-                                params.x = x;
-                                params.y = y;
-                                //new InjectEvent().execute(chatHead);
-                                windowManager.addView(chatHead, params);
-                                //timer.scheduleAtFixedRate(m, 0, 100);
+                                windowManager.addView(chatHead, params);*/
 
+                                windowManager.removeViewImmediate(chatHead);
+                                Shell.SU.run("input tap " + x + " " + y + "");
                                 try {
-                                    Thread.sleep(200);
+                                    Thread.sleep(100);
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
-
-                                windowManager.removeViewImmediate(chatHead);
+                                windowManager.addView(chatHead,params);
+                                /*windowManager.removeViewImmediate(chatHead);
                                 windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
                                 params = new WindowManager.LayoutParams(
                                         WindowManager.LayoutParams.WRAP_CONTENT,
@@ -152,10 +121,8 @@ public class ServiceFloating extends Service {
                                 params.gravity = Gravity.TOP | Gravity.LEFT;
                                 params.x = (initialX + (int) (event.getRawX() - initialTouchX));
                                 params.y = (initialY + (int) (event.getRawY() - initialTouchY));
-                                //new InjectEvent().execute(chatHead);
-                                windowManager.addView(chatHead, params);
+                                windowManager.addView(chatHead, params);*/
                             }
-
                             break;
 
                         case MotionEvent.ACTION_MOVE:
@@ -171,6 +138,18 @@ public class ServiceFloating extends Service {
             // TODO: handle exception
         }
 
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (chatHead != null) windowManager.removeView(chatHead);
+    }
+}
+
+
+
+/* Shell.SU.run("input tap " + x + " " + y + "");
         chatHead.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -178,25 +157,21 @@ public class ServiceFloating extends Service {
                 //		initiatePopupWindow(chatHead);
                 _enable = false;
             }
-        });
-    }
+        });*/
 
-    class MyTask extends TimerTask {
+
+/*    class MyTask extends TimerTask {
         @Override
         public void run() {
 
 
         }
 
-    }
+    }*/
 
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (chatHead != null) windowManager.removeView(chatHead);
-    }
 
+/*
 
     class InjectEvent extends AsyncTask<View, Void, View> {
         MotionEvent m1;
@@ -216,11 +191,12 @@ public class ServiceFloating extends Service {
             super.onPostExecute(o);
             if (m1.getAction() == MotionEvent.ACTION_DOWN) {
                 //	windowManager.removeViewImmediate(o);
-                o.performClick();
+             //   o.performClick();
                 o.dispatchTouchEvent(m1);
             }
         }
     }
+*/
 /*
 	Thread thread = new Thread(){
 		@Override
@@ -236,9 +212,11 @@ public class ServiceFloating extends Service {
 					SystemClock.uptimeMillis(),
 					MotionEvent.ACTION_UP,width*4/5,height, 0));
 		}
-	};*/
+	};*//*
 
 
+
+*/
 /*
 	private void initiatePopupWindow(View anchor) {
 		try {
@@ -276,4 +254,3 @@ public class ServiceFloating extends Service {
 */
 
 
-}
